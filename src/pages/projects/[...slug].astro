@@ -1,0 +1,110 @@
+---
+// ============================================================================
+//  src/pages/projects/[...slug].astro  —  ONE project's case-study page
+// ============================================================================
+//
+//  WHAT'S HERE: this single file generates a page for EVERY project Markdown
+//  file automatically. The "[...slug]" in the filename is Astro's way of
+//  saying "make one page per item, using its id as the URL". So
+//  src/content/projects/tinyrenderer.md  becomes  /projects/tinyrenderer .
+//
+//  You almost never edit this file — it's the template all projects share.
+//  To change a project's words, edit its Markdown file instead.
+// ============================================================================
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+// getStaticPaths tells Astro every page to build (one per project file).
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+// `render` turns the Markdown body into a component we can place on the page.
+const { Content } = await render(project);
+
+// Format the date nicely (e.g. "March 2026").
+const dateLabel = project.data.date.toLocaleDateString('en-GB', {
+  year: 'numeric',
+  month: 'long',
+});
+---
+
+<BaseLayout title={`${project.data.title} — [[YOUR_NAME]]`} description={project.data.description}>
+  <!-- Back link -->
+  <a href="/projects" class="text-sm font-medium text-accent-500 hover:underline">
+    &larr; All projects
+  </a>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="mt-4">
+    <div class="flex items-center gap-3">
+      <span
+        class:list={[
+          'rounded-full px-2.5 py-0.5 text-xs font-medium capitalize',
+          project.data.category === 'software'
+            ? 'bg-accent-100 text-accent-700 dark:bg-accent-900/50 dark:text-accent-300'
+            : 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300',
+        ]}
+      >
+        {project.data.category}
+      </span>
+      <time class="text-sm text-slate-500 dark:text-slate-400">{dateLabel}</time>
+    </div>
+
+    <h1 class="mt-3 font-serif text-3xl font-bold text-slate-900 dark:text-white">
+      {project.data.title}
+    </h1>
+    <p class="mt-2 max-w-2xl text-lg text-slate-600 dark:text-slate-300">
+      {project.data.description}
+    </p>
+
+    <!-- Tags -->
+    <ul class="mt-4 flex flex-wrap gap-1.5">
+      {
+        project.data.tags.map((tag) => (
+          <li class="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+            {tag}
+          </li>
+        ))
+      }
+    </ul>
+
+    <!-- Optional external links (only show if present in the frontmatter). -->
+    <div class="mt-5 flex flex-wrap gap-3">
+      {
+        project.data.demoUrl && (
+          <a
+            href={project.data.demoUrl}
+            class="rounded-lg bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-500"
+            rel="noopener"
+          >
+            Live demo &rarr;
+          </a>
+        )
+      }
+      {
+        project.data.githubUrl && (
+          <a
+            href={project.data.githubUrl}
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-accent-400 hover:text-accent-500 dark:border-slate-700 dark:text-slate-200"
+            rel="noopener"
+          >
+            View code
+          </a>
+        )
+      }
+    </div>
+  </header>
+
+  <!-- ===================== CASE-STUDY BODY ===================== -->
+  <!-- This renders the Markdown you wrote below the frontmatter fence. -->
+  <article class="prose-content mt-8 max-w-2xl text-slate-700 dark:text-slate-300">
+    <Content />
+  </article>
+</BaseLayout>

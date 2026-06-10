@@ -1,0 +1,81 @@
+---
+// ============================================================================
+//  BaseLayout.astro  —  the shared "frame" wrapped around every page
+// ============================================================================
+//
+//  PURPOSE: every page on the site uses this layout, so the <head>, the header
+//  navigation, the footer, and the dark-mode behaviour all live here in ONE
+//  place. A page just provides its title, description, and its content.
+//
+//  HOW A PAGE USES IT (example):
+//      ---
+//      import BaseLayout from '../layouts/BaseLayout.astro';
+//      ---
+//      <BaseLayout title="About" description="A little about me.">
+//        <h1>About</h1>
+//        ...your content...
+//      </BaseLayout>
+// ============================================================================
+
+import SEO from '../components/SEO.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { ClientRouter } from 'astro:transitions';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Optional custom social-share image for this page. */
+  image?: string;
+}
+
+const { title, description, image } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <SEO title={title} description={description} image={image} />
+
+    <!-- ClientRouter enables Astro's built-in View Transitions: smooth
+         fade/slide between pages with no heavy JavaScript framework. It
+         automatically respects "prefers-reduced-motion". -->
+    <ClientRouter />
+
+    <!-- NO-FLASH THEME SCRIPT.
+         This runs immediately, before the page is painted, so the correct
+         theme is applied instantly and you never see a flash of the wrong
+         colours. Default is DARK unless the visitor previously chose light.
+         `is:inline` tells Astro to leave this script exactly as-is in the
+         <head>. You should not need to edit it. -->
+    <script is:inline>
+      const saved = localStorage.getItem('theme');
+      // Default to dark when there is no saved preference.
+      if (saved === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+    </script>
+  </head>
+
+  <body class="min-h-screen bg-white text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-200">
+    <!-- Skip link for keyboard / screen-reader users (accessibility). -->
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-accent-600 focus:px-4 focus:py-2 focus:text-white"
+    >
+      Skip to content
+    </a>
+
+    <Header />
+
+    <!-- The actual page content gets dropped in here via <slot />. -->
+    <main id="main" class="mx-auto max-w-5xl px-4 py-10 animate-fade-in">
+      <slot />
+    </main>
+
+    <Footer />
+  </body>
+</html>

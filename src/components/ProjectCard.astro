@@ -1,0 +1,63 @@
+---
+// ============================================================================
+//  ProjectCard.astro  —  one clickable card in a list of projects
+// ============================================================================
+//
+//  PURPOSE: shows a single project's title, description, category badge and
+//  tags as a card that links to its full case-study page. Used on the home
+//  page (featured strip) and the /projects index.
+//
+//  You normally don't edit this — it just displays whatever is in your
+//  Markdown frontmatter.
+// ============================================================================
+
+interface Props {
+  /** The URL id of the project (its filename without .md). */
+  id: string;
+  title: string;
+  description: string;
+  category: 'software' | 'research';
+  tags: string[];
+}
+
+const { id, title, description, category, tags } = Astro.props;
+---
+
+<!-- data-category lets the /projects filter buttons show/hide this card. -->
+<article
+  data-category={category}
+  class="group relative flex h-full flex-col rounded-xl border border-slate-200 bg-white p-5 transition hover:border-accent-400 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-accent-500"
+>
+  <div class="mb-3 flex items-center gap-2">
+    <span
+      class:list={[
+        'rounded-full px-2.5 py-0.5 text-xs font-medium capitalize',
+        category === 'software'
+          ? 'bg-accent-100 text-accent-700 dark:bg-accent-900/50 dark:text-accent-300'
+          : 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300',
+      ]}
+    >
+      {category}
+    </span>
+  </div>
+
+  <h3 class="font-serif text-lg font-semibold text-slate-900 dark:text-white">
+    <a href={`/projects/${id}`} class="after:absolute after:inset-0">
+      <span class="relative">{title}</span>
+    </a>
+  </h3>
+
+  <p class="mt-2 flex-grow text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+    {description}
+  </p>
+
+  <ul class="mt-4 flex flex-wrap gap-1.5">
+    {
+      tags.map((tag) => (
+        <li class="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+          {tag}
+        </li>
+      ))
+    }
+  </ul>
+</article>
