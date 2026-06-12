@@ -56,8 +56,12 @@
     // the 600×360 drawing gets stretched to fill the page and looks blurry.
     const pixelRatio = window.devicePixelRatio || 1;
     const displayWidth = canvas.clientWidth || canvas.width;
+    // Aim for a wide 5:3 shape, but never let the demo grow taller than about
+    // two thirds of the window — on big screens the canvas spans the full
+    // page width, and uncapped it would be taller than the screen itself.
+    const displayHeight = Math.min(displayWidth * 0.6, window.innerHeight * 0.66);
     canvas.width = Math.round(displayWidth * pixelRatio);
-    canvas.height = Math.round(displayWidth * 0.6 * pixelRatio); // keep 5:3 shape
+    canvas.height = Math.round(displayHeight * pixelRatio);
 
     const width = canvas.width;
     const height = canvas.height;
@@ -130,10 +134,11 @@
       let ry = y * cosX - rz * sinX;
       rz = y * sinX + rz * cosX;
 
-      // Perspective: divide by distance from the camera. The 0.18 keeps the
-      // cube the same size relative to the canvas at any resolution.
+      // Perspective: divide by distance from the camera. Sizing the cube from
+      // whichever canvas dimension is smaller keeps it fully in view whatever
+      // shape the canvas ends up (very wide screens cap its height above).
       const distance = 4;
-      const scale = (width * 0.18) / (distance - rz);
+      const scale = Math.min(width * 0.18, height * 0.3) / (distance - rz);
 
       return [width / 2 + rx * scale, height / 2 + ry * scale];
     }

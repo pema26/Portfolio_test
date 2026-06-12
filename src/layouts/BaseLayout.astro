@@ -46,7 +46,11 @@ const { title, description, image } = Astro.props;
     <!-- NO-FLASH THEME SCRIPT.
          This runs immediately, before the page is painted, so the correct
          theme is applied instantly and you never see a flash of the wrong
-         colours. Default is DARK unless the visitor previously chose light.
+         colours.
+
+         WHICH THEME WINS: a choice the visitor made with the toggle button
+         (saved in localStorage) always wins; otherwise we follow the
+         operating system / browser "dark mode" setting.
 
          IMPORTANT: it also re-applies the theme after every page navigation.
          The <ClientRouter /> above swaps in the new page's <html> attributes,
@@ -59,13 +63,27 @@ const { title, description, image } = Astro.props;
          <head>. You should not need to edit it. -->
     <script is:inline>
       (function () {
+        const osPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+
         function applyTheme() {
           const saved = localStorage.getItem('theme');
-          // Default to dark when there is no saved preference.
-          document.documentElement.classList.toggle('dark', saved !== 'light');
+          // A saved manual choice wins; otherwise follow the OS setting.
+          const dark = saved ? saved === 'dark' : osPrefersDark.matches;
+          document.documentElement.classList.toggle('dark', dark);
         }
+
         applyTheme(); // first load
         document.addEventListener('astro:after-swap', applyTheme); // every navigation
+
+        // If the OS switches theme (e.g. automatic dark mode at sunset) and
+        // the visitor never picked one manually, follow along live.
+        osPrefersDark.addEventListener('change', applyTheme);
+
+        // Keep every open tab in sync: the "storage" event fires in OTHER
+        // tabs whenever the toggle saves a new choice in this one.
+        window.addEventListener('storage', (event) => {
+          if (event.key === 'theme') applyTheme();
+        });
       })();
     </script>
   </head>
@@ -82,7 +100,8 @@ const { title, description, image } = Astro.props;
     <Header />
 
     <!-- The actual page content gets dropped in here via <slot />. -->
-    <main id="main" class="mx-auto max-w-5xl px-4 py-10 animate-fade-in">
+    <!-- Full-width content with a little breathing room at the edges. -->
+    <main id="main" class="w-full px-4 py-10 sm:px-6 lg:px-10 animate-fade-in">
       <slot />
     </main>
 

@@ -6,9 +6,11 @@
 //  PURPOSE: a single button that flips the site between dark and light mode
 //  and remembers the choice in the browser (localStorage) for next time.
 //
-//  The site defaults to DARK. The tiny script in BaseLayout.astro applies the
-//  saved choice before the page paints, so there is no "flash" of the wrong
-//  theme. This button just toggles it afterwards.
+//  With no saved choice the site follows the visitor's operating-system
+//  theme. The tiny script in BaseLayout.astro applies the right theme before
+//  the page paints (so there is no "flash" of the wrong theme), keeps it
+//  through page navigations, and syncs it across open tabs. This button just
+//  saves a manual choice that overrides the OS setting.
 // ============================================================================
 ---
 
