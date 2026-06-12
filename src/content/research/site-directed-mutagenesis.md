@@ -1,7 +1,6 @@
 ---
 title: "Site-directed mutagenesis of catechol 2,3-dioxygenase"
 description: "Designing mutagenic primers to alter a gene in Pseudomonas aeruginosa, then confirming the change by analysing Sanger sequencing chromatograms."
-category: "research"
 date: 2025-11-10
 tags: ["molecular biology", "P. aeruginosa", "Sanger sequencing"]
 featured: true

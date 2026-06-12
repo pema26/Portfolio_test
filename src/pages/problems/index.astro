@@ -1,0 +1,107 @@
+---
+// ============================================================================
+//  src/pages/problems/index.astro  —  the PROBLEMS SOLVED page  ("/problems")
+// ============================================================================
+//
+//  WHAT'S HERE: two parts —
+//    1. A "Competitive profiles" card linking out to my Codeforces account so
+//       visitors can see my live rating and history.
+//    2. A showcase of individual solved problems from the `challenges`
+//       collection, grouped by source (Codeforces, freeCodeCamp, …). Add one by
+//       dropping a new Markdown file in src/content/challenges/ — see the README.
+// ============================================================================
+
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ChallengeCard from '../../components/ChallengeCard.astro';
+import { getCollection } from 'astro:content';
+
+// Load every challenge, newest first.
+const challenges = (await getCollection('challenges')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+
+// Group them by their `source` so each platform gets its own sub-section.
+const bySource = new Map<string, typeof challenges>();
+for (const challenge of challenges) {
+  const list = bySource.get(challenge.data.source) ?? [];
+  list.push(challenge);
+  bySource.set(challenge.data.source, list);
+}
+const sources = [...bySource.keys()].sort();
+---
+
+<BaseLayout
+  title="Problems solved — [[YOUR_NAME]]"
+  description="Competitive programming and coding challenges — my Codeforces profile, plus worked solutions with complexity analysis."
+>
+  <h1 class="font-serif text-3xl font-bold text-slate-900 dark:text-white">Problems solved</h1>
+  <p class="mt-2 text-slate-600 dark:text-slate-400">
+    Where I sharpen algorithms and data-structures skills — my competitive
+    profile, and worked solutions comparing my approach with an AI's.
+  </p>
+
+  <!-- ===================== COMPETITIVE PROFILES ===================== -->
+  <section class="mt-10">
+    <h2 class="font-serif text-2xl font-semibold text-slate-900 dark:text-white">
+      Competitive profiles
+    </h2>
+    <!-- EDIT HERE: set [[CODEFORCES_URL]] (and the handle/rating) to your real
+         account in the README's find-and-replace pass. -->
+    <div class="mt-4 max-w-2xl rounded-xl border border-slate-200 p-5 dark:border-slate-800">
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <p class="font-semibold text-slate-900 dark:text-white">Codeforces</p>
+          <p class="text-sm text-slate-500 dark:text-slate-400">
+            Handle <span class="font-medium">[[CODEFORCES_HANDLE]]</span> ·
+            current rating <span class="font-medium">[[CODEFORCES_RATING]]</span>
+          </p>
+        </div>
+        <a
+          href="[[CODEFORCES_URL]]"
+          class="shrink-0 rounded-lg bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-500"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View profile &rarr;
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== WORKED SOLUTIONS ===================== -->
+  <section class="mt-12">
+    <h2 class="font-serif text-2xl font-semibold text-slate-900 dark:text-white">
+      Worked solutions
+    </h2>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+      Each one shows the problem, my solution, an AI's solution in Python and
+      C++, and a short note on time and space complexity.
+    </p>
+
+    {
+      challenges.length === 0 ? (
+        <p class="mt-6 text-slate-500 dark:text-slate-400">No solutions yet.</p>
+      ) : (
+        sources.map((source) => (
+          <div class="mt-8">
+            <h3 class="text-sm font-semibold uppercase tracking-wider text-accent-500">
+              {source}
+            </h3>
+            <div class="mt-4 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {bySource.get(source)!.map((challenge) => (
+                <ChallengeCard
+                  id={challenge.id}
+                  title={challenge.data.title}
+                  description={challenge.data.description}
+                  source={challenge.data.source}
+                  difficulty={challenge.data.difficulty}
+                  tags={challenge.data.tags}
+                />
+              ))}
+            </div>
+          </div>
+        ))
+      )
+    }
+  </section>
+</BaseLayout>

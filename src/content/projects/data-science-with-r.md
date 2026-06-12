@@ -1,7 +1,7 @@
 ---
 title: "Data science with R"
 description: "Working through R for Data Science — turning raw, messy data into clear, reproducible analysis and visualisation."
-category: "software"
+category: "guided"
 date: 2025-12-05
 tags: ["R", "data analysis", "statistics"]
 featured: false

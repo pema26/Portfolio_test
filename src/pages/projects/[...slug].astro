@@ -14,6 +14,15 @@
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection, render } from 'astro:content';
+import { CATEGORY_META, STATUS_META } from '../../lib/projectMeta';
+
+// Map a tone name to its badge colours (same scheme as ProjectCard.astro).
+const TONES: Record<string, string> = {
+  accent: 'bg-accent-100 text-accent-700 dark:bg-accent-900/50 dark:text-accent-300',
+  teal: 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300',
+  amber: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
+  slate: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+};
 
 // getStaticPaths tells Astro every page to build (one per project file).
 export async function getStaticPaths() {
@@ -27,6 +36,9 @@ export async function getStaticPaths() {
 const { project } = Astro.props;
 // `render` turns the Markdown body into a component we can place on the page.
 const { Content } = await render(project);
+
+const category = CATEGORY_META[project.data.category];
+const status = STATUS_META[project.data.status];
 
 // Format the date nicely (e.g. "March 2026").
 const dateLabel = project.data.date.toLocaleDateString('en-GB', {
@@ -43,17 +55,17 @@ const dateLabel = project.data.date.toLocaleDateString('en-GB', {
 
   <!-- ===================== HEADER ===================== -->
   <header class="mt-4">
-    <div class="flex items-center gap-3">
-      <span
-        class:list={[
-          'rounded-full px-2.5 py-0.5 text-xs font-medium capitalize',
-          project.data.category === 'software'
-            ? 'bg-accent-100 text-accent-700 dark:bg-accent-900/50 dark:text-accent-300'
-            : 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300',
-        ]}
-      >
-        {project.data.category}
+    <div class="flex flex-wrap items-center gap-3">
+      <span class:list={['rounded-full px-2.5 py-0.5 text-xs font-medium', TONES[category.tone]]}>
+        {category.label}
       </span>
+      {
+        status && (
+          <span class:list={['rounded-full px-2.5 py-0.5 text-xs font-medium', TONES[status.tone]]}>
+            {status.label}
+          </span>
+        )
+      }
       <time class="text-sm text-slate-500 dark:text-slate-400">{dateLabel}</time>
     </div>
 
