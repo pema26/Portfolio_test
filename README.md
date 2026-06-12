@@ -1,7 +1,9 @@
 # Personal Portfolio Website
 
-A clean, fast, dark-first personal portfolio for a developer-researcher, built
+A clean, fast personal portfolio for a developer-researcher, built
 with [Astro](https://astro.build) and [Tailwind CSS](https://tailwindcss.com).
+It follows the visitor's system dark/light preference by default, with a
+toggle to override it (remembered, and kept in sync across open tabs).
 It presents software projects and scientific research side by side as short
 case studies, with a notes/blog section and an interactive graphics demo on the
 home page.

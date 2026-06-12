@@ -33,7 +33,7 @@ const filters = [
   description="Software engineering and scientific research projects, presented as short case studies."
 >
   <h1 class="font-serif text-3xl font-bold text-slate-900 dark:text-white">Projects</h1>
-  <p class="mt-2 max-w-2xl text-slate-600 dark:text-slate-400">
+  <p class="mt-2 text-slate-600 dark:text-slate-400">
     A mix of software and research work. Use the filters to narrow it down.
   </p>
 
@@ -54,7 +54,7 @@ const filters = [
   </div>
 
   <!-- ===================== PROJECT GRID ===================== -->
-  <div id="project-grid" class="mt-8 grid gap-5 sm:grid-cols-2">
+  <div id="project-grid" class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
     {
       projects.map((project) => (
         <ProjectCard
