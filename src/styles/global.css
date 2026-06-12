@@ -67,10 +67,10 @@
     }
   }
 
-  /* Make the font swap in nicely while web fonts load (performance nicety). */
+  /* The site's base font. (The Google Fonts link in SEO.astro already asks
+     for `display=swap`, so text stays readable while the fonts load.) */
   body {
     font-family: var(--font-sans);
-    font-display: swap;
   }
 
   /* Always show a clear focus ring for keyboard users (accessibility). */

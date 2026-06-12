@@ -40,7 +40,8 @@ const links = [
           <a
             href={link.href}
             class="text-accent-500 transition hover:underline"
-            rel="noopener"
+            target={link.href.startsWith('mailto:') ? undefined : '_blank'}
+            rel="noopener noreferrer"
           >
             {link.value}
           </a>

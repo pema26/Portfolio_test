@@ -51,8 +51,19 @@
     const ctx = canvas.getContext('2d');
     if (!ctx) return; // Browser can't draw — the fallback text stays visible.
 
+    // Match the canvas's internal pixel grid to the size it is actually
+    // displayed at, including high-density ("Retina") screens. Without this
+    // the 600×360 drawing gets stretched to fill the page and looks blurry.
+    const pixelRatio = window.devicePixelRatio || 1;
+    const displayWidth = canvas.clientWidth || canvas.width;
+    canvas.width = Math.round(displayWidth * pixelRatio);
+    canvas.height = Math.round(displayWidth * 0.6 * pixelRatio); // keep 5:3 shape
+
     const width = canvas.width;
     const height = canvas.height;
+    // The "pixels" Bresenham colours in scale with the screen density so the
+    // lines stay the same visual thickness everywhere.
+    const dotSize = 1.5 * pixelRatio;
 
     // Does the visitor prefer reduced motion? If so we'll draw ONE still
     // frame and never animate.
@@ -94,7 +105,7 @@
       ctx.fillStyle = colour;
       // Walk from the start pixel to the end pixel, one step at a time.
       while (true) {
-        ctx.fillRect(x0, y0, 1.5, 1.5); // colour the current pixel
+        ctx.fillRect(x0, y0, dotSize, dotSize); // colour the current pixel
         if (x0 === x1 && y0 === y1) break; // reached the end
         const doubleError = 2 * error;
         if (doubleError >= dy) { error += dy; x0 += stepX; } // step horizontally
@@ -119,9 +130,10 @@
       let ry = y * cosX - rz * sinX;
       rz = y * sinX + rz * cosX;
 
-      // Perspective: divide by distance from the camera.
+      // Perspective: divide by distance from the camera. The 0.18 keeps the
+      // cube the same size relative to the canvas at any resolution.
       const distance = 4;
-      const scale = 110 / (distance - rz);
+      const scale = (width * 0.18) / (distance - rz);
 
       return [width / 2 + rx * scale, height / 2 + ry * scale];
     }
@@ -163,13 +175,21 @@
       }
     }
 
+    // Named handler so we can remove it again during cleanup (below).
+    function handleVisibilityChange() {
+      if (document.hidden) pause();
+      else if (isVisible) play();
+    }
+
+    let observer = null;
+
     if (prefersReducedMotion) {
       // Honour the accessibility setting: draw once, then stop.
       drawFrame(0.7);
     } else {
       // ---- 7. Only animate while the canvas is actually on screen ----------
       // This saves the visitor's battery/CPU when they scroll past it.
-      const observer = new IntersectionObserver((entries) => {
+      observer = new IntersectionObserver((entries) => {
         for (const entry of entries) {
           isVisible = entry.isIntersecting;
           if (isVisible) play();
@@ -179,11 +199,22 @@
       observer.observe(canvas);
 
       // Also pause when the browser tab is hidden.
-      document.addEventListener('visibilitychange', () => {
-        if (document.hidden) pause();
-        else if (isVisible) play();
-      });
+      document.addEventListener('visibilitychange', handleVisibilityChange);
     }
+
+    // ---- 8. Tidy up when navigating away -------------------------------------
+    // Astro fires "astro:before-swap" just before it replaces this page with
+    // the next one. We stop the animation and disconnect our listeners so
+    // they don't quietly pile up each time you visit the home page.
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        pause();
+        if (observer) observer.disconnect();
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+      },
+      { once: true },
+    );
   }
 
   // Run the demo on first load AND after Astro view-transition navigations,

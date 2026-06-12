@@ -47,16 +47,26 @@ const { title, description, image } = Astro.props;
          This runs immediately, before the page is painted, so the correct
          theme is applied instantly and you never see a flash of the wrong
          colours. Default is DARK unless the visitor previously chose light.
+
+         IMPORTANT: it also re-applies the theme after every page navigation.
+         The <ClientRouter /> above swaps in the new page's <html> attributes,
+         which would otherwise wipe the "dark" class and dump you into light
+         mode every time you click a nav link. Listening for Astro's
+         "astro:after-swap" event (which fires right after the swap, before
+         the new page is painted) puts the class back with no flash.
+
          `is:inline` tells Astro to leave this script exactly as-is in the
          <head>. You should not need to edit it. -->
     <script is:inline>
-      const saved = localStorage.getItem('theme');
-      // Default to dark when there is no saved preference.
-      if (saved === 'light') {
-        document.documentElement.classList.remove('dark');
-      } else {
-        document.documentElement.classList.add('dark');
-      }
+      (function () {
+        function applyTheme() {
+          const saved = localStorage.getItem('theme');
+          // Default to dark when there is no saved preference.
+          document.documentElement.classList.toggle('dark', saved !== 'light');
+        }
+        applyTheme(); // first load
+        document.addEventListener('astro:after-swap', applyTheme); // every navigation
+      })();
     </script>
   </head>
 
