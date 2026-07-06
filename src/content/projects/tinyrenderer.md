@@ -6,7 +6,7 @@
 # ==========================================================================
 title: "tinyrenderer: a software rasterizer from scratch"
 description: "Building a 3D renderer with no graphics library — Bresenham line drawing, wireframes, and triangle rasterization, one pixel at a time."
-category: "software"          # must be "software" or "research"
+category: "guided"           # big-unique | guided | mini-unique
 date: 2026-02-15             # YYYY-MM-DD
 tags: ["C++", "graphics", "rendering"]
 demoUrl: "https://haqr.eu/tinyrenderer"   # optional

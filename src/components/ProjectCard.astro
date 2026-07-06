@@ -1,48 +1,66 @@
 ---
 // ============================================================================
-//  ProjectCard.astro  —  one clickable card in a list of projects
+//  ProjectCard.astro  —  one clickable card for a project or research entry
 // ============================================================================
 //
-//  PURPOSE: shows a single project's title, description, category badge and
-//  tags as a card that links to its full case-study page. Used on the home
-//  page (featured strip) and the /projects index.
+//  PURPOSE: shows a single entry's title, description, tags, and (optionally) a
+//  coloured category badge and a status pill, as a card linking to its full
+//  page. Used on the home page, the /projects page, and the /research page.
 //
-//  You normally don't edit this — it just displays whatever is in your
-//  Markdown frontmatter.
+//  You normally don't edit this — it just displays what the page hands it.
 // ============================================================================
 
+// A "tone" is just a named colour scheme. Listing the full class strings here
+// (rather than building them on the fly) is what lets Tailwind see and keep
+// them. Add a new tone by adding a line below.
+const TONES: Record<string, string> = {
+  accent: 'bg-accent-100 text-accent-700 dark:bg-accent-900/50 dark:text-accent-300',
+  teal: 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300',
+  amber: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
+  slate: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+};
+
 interface Props {
-  /** The URL id of the project (its filename without .md). */
+  /** The URL id of the entry (its filename without .md). */
   id: string;
   title: string;
   description: string;
-  category: 'software' | 'research';
   tags: string[];
+  /** The URL section this card links into, e.g. "/projects" or "/research". */
+  basePath?: string;
+  /** Optional coloured category label, e.g. { label: 'Flagship', tone: 'accent' }. */
+  badge?: { label: string; tone: keyof typeof TONES };
+  /** Optional status pill, e.g. { label: 'In progress', tone: 'amber' }. */
+  status?: { label: string; tone: keyof typeof TONES };
 }
 
-const { id, title, description, category, tags } = Astro.props;
+const { id, title, description, tags, basePath = '/projects', badge, status } =
+  Astro.props;
 ---
 
-<!-- data-category lets the /projects filter buttons show/hide this card. -->
 <article
-  data-category={category}
   class="group relative flex h-full flex-col rounded-xl border border-slate-200 bg-white p-5 transition hover:border-accent-400 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-accent-500"
 >
-  <div class="mb-3 flex items-center gap-2">
-    <span
-      class:list={[
-        'rounded-full px-2.5 py-0.5 text-xs font-medium capitalize',
-        category === 'software'
-          ? 'bg-accent-100 text-accent-700 dark:bg-accent-900/50 dark:text-accent-300'
-          : 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300',
-      ]}
-    >
-      {category}
-    </span>
-  </div>
+  <!-- Top row of pills (only rendered if there's a badge or a status). -->
+  {
+    (badge || status) && (
+      <div class="mb-3 flex flex-wrap items-center gap-2">
+        {badge && (
+          <span class:list={['rounded-full px-2.5 py-0.5 text-xs font-medium', TONES[badge.tone]]}>
+            {badge.label}
+          </span>
+        )}
+        {status && (
+          <span class:list={['rounded-full px-2.5 py-0.5 text-xs font-medium', TONES[status.tone]]}>
+            {status.label}
+          </span>
+        )}
+      </div>
+    )
+  }
 
   <h3 class="font-serif text-lg font-semibold text-slate-900 dark:text-white">
-    <a href={`/projects/${id}`} class="after:absolute after:inset-0">
+    <a href={`${basePath}/${id}`} class="after:absolute after:inset-0">
       <span class="relative">{title}</span>
     </a>
   </h3>

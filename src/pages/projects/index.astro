@@ -3,126 +3,70 @@
 //  src/pages/projects/index.astro  —  the PROJECTS list  ("/projects" route)
 // ============================================================================
 //
-//  WHAT'S HERE: this page automatically lists EVERY entry in the `projects`
-//  content collection (every .md file in src/content/projects/). You never
-//  edit this file to add a project — you just add a new Markdown file and it
-//  appears here. See the README for the copy-and-edit steps.
-//
-//  It also has simple "All / Software / Research" filter buttons.
+//  WHAT'S HERE: every entry in the `projects` content collection, grouped into
+//  three labelled sections — Flagship, Guided builds, and Mini projects — based
+//  on each file's `category`. You never edit this page to add a project: just
+//  add a new Markdown file in src/content/projects/ with the right category and
+//  it appears under the matching heading. See the README for the steps.
 // ============================================================================
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import { getCollection } from 'astro:content';
+import { CATEGORY_META, STATUS_META, type Category } from '../../lib/projectMeta';
 
 // Load every project, newest first.
 const projects = (await getCollection('projects')).sort(
   (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
 );
 
-// The three filter buttons. "all" shows everything.
-const filters = [
-  { value: 'all', label: 'All' },
-  { value: 'software', label: 'Software' },
-  { value: 'research', label: 'Research' },
-];
+// Build the sections in the order defined in projectMeta.ts, each holding the
+// projects whose category matches.
+const sections = (Object.keys(CATEGORY_META) as Category[])
+  .map((category) => ({
+    category,
+    meta: CATEGORY_META[category],
+    items: projects.filter((p) => p.data.category === category),
+  }))
+  .sort((a, b) => a.meta.order - b.meta.order);
 ---
 
 <BaseLayout
   title="Projects — [[YOUR_NAME]]"
-  description="Software engineering and scientific research projects, presented as short case studies."
+  description="Software projects in three tiers: flagship original ideas, guided tutorial builds, and small tools that solve real problems."
 >
   <h1 class="font-serif text-3xl font-bold text-slate-900 dark:text-white">Projects</h1>
   <p class="mt-2 text-slate-600 dark:text-slate-400">
-    A mix of software and research work. Use the filters to narrow it down.
+    My build work, grouped by kind — from original, ambitious ideas to small
+    tools that scratch a real itch.
   </p>
 
-  <!-- ===================== FILTER BUTTONS ===================== -->
-  <div class="mt-6 flex flex-wrap gap-2" role="group" aria-label="Filter projects by category">
-    {
-      filters.map((filter, index) => (
-        <button
-          type="button"
-          class="filter-btn rounded-lg border px-4 py-1.5 text-sm font-medium transition"
-          data-filter={filter.value}
-          aria-pressed={index === 0 ? 'true' : 'false'}
-        >
-          {filter.label}
-        </button>
-      ))
-    }
-  </div>
+  {
+    sections.map((section) => (
+      <section class="mt-12">
+        <h2 class="font-serif text-2xl font-semibold text-slate-900 dark:text-white">
+          {section.meta.title}
+        </h2>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{section.meta.blurb}</p>
 
-  <!-- ===================== PROJECT GRID ===================== -->
-  <div id="project-grid" class="mt-8 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-    {
-      projects.map((project) => (
-        <ProjectCard
-          id={project.id}
-          title={project.data.title}
-          description={project.data.description}
-          category={project.data.category}
-          tags={project.data.tags}
-        />
-      ))
-    }
-  </div>
-
-  <p id="empty-message" class="mt-8 hidden text-slate-500 dark:text-slate-400">
-    No projects in this category yet.
-  </p>
-</BaseLayout>
-
-<script>
-  // ==========================================================================
-  //  Small filter script. Clicking a button shows only the matching cards.
-  //  (Each card carries a data-category attribute set in ProjectCard.astro.)
-  //  This is presentation-only — no project data lives here.
-  // ==========================================================================
-  function setupProjectFilter() {
-    const buttons = document.querySelectorAll('.filter-btn');
-    const cards = document.querySelectorAll('#project-grid > [data-category]');
-    const emptyMessage = document.getElementById('empty-message');
-    if (buttons.length === 0) return;
-
-    // Styling helper: highlight whichever button is "pressed".
-    function paintButtons() {
-      buttons.forEach((btn) => {
-        const pressed = btn.getAttribute('aria-pressed') === 'true';
-        btn.classList.toggle('bg-accent-600', pressed);
-        btn.classList.toggle('text-white', pressed);
-        btn.classList.toggle('border-accent-600', pressed);
-        btn.classList.toggle('border-slate-300', !pressed);
-        btn.classList.toggle('dark:border-slate-700', !pressed);
-        btn.classList.toggle('text-slate-700', !pressed);
-        btn.classList.toggle('dark:text-slate-300', !pressed);
-      });
-    }
-
-    buttons.forEach((button) => {
-      button.addEventListener('click', () => {
-        const choice = button.getAttribute('data-filter');
-
-        // Mark this button as the active one.
-        buttons.forEach((b) => b.setAttribute('aria-pressed', 'false'));
-        button.setAttribute('aria-pressed', 'true');
-        paintButtons();
-
-        // Show/hide cards and count how many are visible.
-        let visible = 0;
-        cards.forEach((card) => {
-          const matches =
-            choice === 'all' || card.getAttribute('data-category') === choice;
-          (card as HTMLElement).style.display = matches ? '' : 'none';
-          if (matches) visible++;
-        });
-        emptyMessage?.classList.toggle('hidden', visible !== 0);
-      });
-    });
-
-    paintButtons(); // set the initial "All" highlight
+        {section.items.length === 0 ? (
+          <p class="mt-4 text-sm text-slate-500 dark:text-slate-400">
+            Nothing here yet — watch this space.
+          </p>
+        ) : (
+          <div class="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {section.items.map((project) => (
+              <ProjectCard
+                id={project.id}
+                title={project.data.title}
+                description={project.data.description}
+                tags={project.data.tags}
+                status={STATUS_META[project.data.status] ?? undefined}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    ))
   }
-
-  setupProjectFilter();
-  document.addEventListener('astro:page-load', setupProjectFilter);
-</script>
+</BaseLayout>

@@ -1,7 +1,6 @@
 ---
 title: "Kinase inhibitors in targeted therapy"
 description: "A presentation on how small-molecule kinase inhibitors are used in cancer and inflammatory disease — imatinib, gefitinib, and JAK/p38 inhibitors."
-category: "research"
 date: 2025-10-15
 tags: ["pharmacology", "oncology"]
 featured: false

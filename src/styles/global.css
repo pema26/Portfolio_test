@@ -140,12 +140,32 @@
   text-decoration: underline;
   text-underline-offset: 2px;
 }
-.prose-content :where(code) {
+/* Inline code, e.g. `dplyr` — but NOT code inside a fenced block (that gets
+   the styling below instead). */
+.prose-content :where(:not(pre) > code) {
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 0.9em;
   background: rgba(99, 102, 241, 0.12);
   padding: 0.1em 0.35em;
   border-radius: 4px;
+}
+
+/* Fenced code blocks (```python … ```). Astro/Shiki sets the colours via an
+   inline background on <pre>; here we just add padding, rounded corners, and
+   horizontal scrolling for long lines. */
+.prose-content :where(pre) {
+  margin: 1.25rem 0;
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.prose-content :where(pre code) {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
 }
 .prose-content :where(blockquote) {
   border-left: 3px solid var(--color-accent-400);
