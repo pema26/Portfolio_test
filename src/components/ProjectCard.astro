@@ -4,11 +4,13 @@
 // ============================================================================
 //
 //  PURPOSE: shows a single entry's title, description, tags, and (optionally) a
-//  coloured category badge and a status pill, as a card linking to its full
-//  page. Used on the home page, the /projects page, and the /research page.
+//  coloured category badge, a status pill, a "Completed" pill, or a progress
+//  bar. Used on the home page, the /projects page, and the /research page.
 //
 //  You normally don't edit this — it just displays what the page hands it.
 // ============================================================================
+
+import ProgressBar from './ProgressBar.astro';
 
 // A "tone" is just a named colour scheme. Listing the full class strings here
 // (rather than building them on the fly) is what lets Tailwind see and keep
@@ -17,6 +19,7 @@ const TONES: Record<string, string> = {
   accent: 'bg-accent-100 text-accent-700 dark:bg-accent-900/50 dark:text-accent-300',
   teal: 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300',
   amber: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
+  emerald: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300',
   slate: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
 };
 
@@ -32,18 +35,33 @@ interface Props {
   badge?: { label: string; tone: keyof typeof TONES };
   /** Optional status pill, e.g. { label: 'In progress', tone: 'amber' }. */
   status?: { label: string; tone: keyof typeof TONES };
+  /** When true, show a "Completed" pill (used for finished mini projects). */
+  completed?: boolean;
+  /** 0–100 progress; when set, shows a progress bar (used for guided builds). */
+  progress?: number;
 }
 
-const { id, title, description, tags, basePath = '/projects', badge, status } =
-  Astro.props;
+const {
+  id,
+  title,
+  description,
+  tags,
+  basePath = '/projects',
+  badge,
+  status,
+  completed = false,
+  progress,
+} = Astro.props;
+
+const hasPills = badge || status || completed;
 ---
 
 <article
   class="group relative flex h-full flex-col rounded-xl border border-slate-200 bg-white p-5 transition hover:border-accent-400 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-accent-500"
 >
-  <!-- Top row of pills (only rendered if there's a badge or a status). -->
+  <!-- Top row of pills (only rendered if there's something to show). -->
   {
-    (badge || status) && (
+    hasPills && (
       <div class="mb-3 flex flex-wrap items-center gap-2">
         {badge && (
           <span class:list={['rounded-full px-2.5 py-0.5 text-xs font-medium', TONES[badge.tone]]}>
@@ -53,6 +71,14 @@ const { id, title, description, tags, basePath = '/projects', badge, status } =
         {status && (
           <span class:list={['rounded-full px-2.5 py-0.5 text-xs font-medium', TONES[status.tone]]}>
             {status.label}
+          </span>
+        )}
+        {completed && (
+          <span class:list={['inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium', TONES.emerald]}>
+            <svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 1 1 1.4-1.4l3.1 3.1 6.8-6.8a1 1 0 0 1 1.4 0Z" clip-rule="evenodd" />
+            </svg>
+            Completed
           </span>
         )}
       </div>
@@ -78,4 +104,13 @@ const { id, title, description, tags, basePath = '/projects', badge, status } =
       ))
     }
   </ul>
+
+  {/* Guided builds show how far along they are. */}
+  {
+    typeof progress === 'number' && (
+      <div class="mt-4">
+        <ProgressBar value={progress} />
+      </div>
+    )
+  }
 </article>

@@ -9,6 +9,12 @@ description: "Building a 3D renderer with no graphics library — Bresenham line
 category: "guided"           # big-unique | guided | mini-unique
 date: 2026-02-15             # YYYY-MM-DD
 tags: ["C++", "graphics", "rendering"]
+progress: 75                 # EDIT HERE: 0–100. Guided builds show this as a bar.
+# devlog:                    # EDIT HERE: add a dated entry each day you work on it.
+#   - date: 2026-02-10
+#     summary: "Set up the project and drew my first Bresenham line."
+#   - date: 2026-02-12
+#     summary: "Joined lines into a wireframe model."
 demoUrl: "https://haqr.eu/tinyrenderer"   # optional
 # githubUrl: "[[GITHUB_URL]]"             # optional — uncomment and set
 featured: true                            # show on the home page?

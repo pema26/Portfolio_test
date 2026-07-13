@@ -50,6 +50,16 @@ const projects = defineCollection({
     date: z.coerce.date(), // written as YYYY-MM-DD in the Markdown
     tags: z.array(z.string()),
 
+    // ---- Guided-build tracking (optional) --------------------------------
+    // For "guided" projects you're working through over time. `progress` is a
+    // 0–100 percent that fills the progress bar on the card and project page.
+    // `devlog` is a dated list of what you did each day — leave it empty until
+    // you have entries; each entry is { date, summary }.
+    progress: z.number().min(0).max(100).optional(),
+    devlog: z
+      .array(z.object({ date: z.coerce.date(), summary: z.string() }))
+      .default([]),
+
     // Optional fields (leave them out if not relevant):
     githubUrl: z.string().url().optional(),
     demoUrl: z.string().url().optional(),

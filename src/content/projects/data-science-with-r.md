@@ -4,6 +4,10 @@ description: "Working through R for Data Science — turning raw, messy data int
 category: "guided"
 date: 2025-12-05
 tags: ["R", "data analysis", "statistics"]
+progress: 45                 # EDIT HERE: 0–100. Guided builds show this as a bar.
+# devlog:                    # EDIT HERE: add a dated entry each day you work on it.
+#   - date: 2025-12-01
+#     summary: "Worked through the data-import and tidy chapters."
 featured: false
 ---
 

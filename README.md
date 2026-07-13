@@ -175,7 +175,23 @@ Markdown file and edit the text.**
 
    **The optional `status`** shows a little pill on the card. Use `planned` or
    `in-progress` for work you haven't finished (great for Flagship ideas);
-   leave it off or set `complete` for finished work (no pill shows).
+   leave it off or set `complete` for finished work (no pill shows). Finished
+   **mini** projects show a green "Completed" tick automatically.
+
+   **Guided-build tracking (optional).** For `guided` projects you're working
+   through over time, two extra fields drive the card and the project page:
+   - `progress: 60` — a 0–100 percent that fills the "In progress" bar.
+   - `devlog:` — a dated day-by-day log that renders as a timeline at the
+     bottom of the project page. Add entries as you go:
+     ```yaml
+     devlog:
+       - date: 2026-02-10
+         summary: "Set up the project and drew my first Bresenham line."
+       - date: 2026-02-12
+         summary: "Joined lines into a wireframe model."
+     ```
+     Leave it out (or empty) until you have entries — the page shows a
+     friendly "no entries yet" note.
 
 4. Below the second `---`, write the project write-up in **Markdown**. A good
    shape is: Problem → Approach → Solution → Result/tradeoffs. Use `##` for a
