@@ -61,7 +61,11 @@ const sections = (Object.keys(CATEGORY_META) as Category[])
                 title={project.data.title}
                 description={project.data.description}
                 tags={project.data.tags}
-                status={STATUS_META[project.data.status] ?? undefined}
+                {...(section.category === 'guided'
+                  ? { progress: project.data.progress }
+                  : section.category === 'mini-unique'
+                    ? { completed: project.data.status === 'complete' }
+                    : { status: STATUS_META[project.data.status] ?? undefined })}
               />
             ))}
           </div>

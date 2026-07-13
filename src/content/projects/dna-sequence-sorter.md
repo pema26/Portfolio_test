@@ -44,3 +44,56 @@ processing in Python.
 The natural next step is to turn the species search into a proper command-line
 option (and maybe report which file each match lives in), so it generalises
 beyond this one task.
+
+## The code
+
+The core is a small helper that reads a named file **inside** the results
+archive without unzipping the whole thing to disk:
+
+```python
+import io
+import os
+import zipfile
+
+def read_file_in_zip(zip_path, file_name):
+    """
+    Reads the content of a file inside a ZIP archive without extracting it.
+
+    :param zip_path: Path to the ZIP file.
+    :param file_name: Name of the file inside the ZIP to read.
+    :return: Content of the file as bytes.
+    """
+    try:
+        # Open the ZIP file in read mode
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            # Check if the file exists in the archive
+            if file_name not in zip_ref.namelist():
+                raise FileNotFoundError(f"'{file_name}' not found in the ZIP archive.")
+
+            # Open the file inside the ZIP (returns a file-like object)
+            with zip_ref.open(file_name) as file:
+                content = file.read()  # Read file content into memory
+                return content
+
+    except zipfile.BadZipFile:
+        raise ValueError("The provided file is not a valid ZIP archive.")
+    except Exception as e:
+        raise RuntimeError(f"Error reading file from ZIP: {e}")
+
+
+# Example usage
+if __name__ == "__main__":
+    zip_file_path = "example.zip"
+    inner_file_name = "data.txt"
+
+    try:
+        data = read_file_in_zip(zip_file_path, inner_file_name)
+        print("File content inside ZIP:")
+        print(data.decode('utf-8'))  # Decode if it's text
+    except Exception as err:
+        print(err)
+```
+
+With that in place, the rest of the tool loops over the sequencing files in the
+archive, pulls each one's text, and searches the combined result for the species
+I'm after — no more opening them one by one.

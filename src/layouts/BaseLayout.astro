@@ -20,6 +20,7 @@
 import SEO from '../components/SEO.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import Background from '../components/Background.astro';
 import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 
@@ -89,6 +90,11 @@ const { title, description, image } = Astro.props;
   </head>
 
   <body class="min-h-screen bg-white text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-200">
+    <!-- Site-wide animated wireframe background. It sits behind everything
+         (z-index:-1), draws a per-section motif in the site's indigo accent,
+         and re-colours with the theme. See src/components/Background.astro. -->
+    <Background />
+
     <!-- Skip link for keyboard / screen-reader users (accessibility). -->
     <a
       href="#main"

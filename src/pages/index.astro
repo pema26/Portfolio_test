@@ -14,6 +14,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CanvasDemo from '../components/CanvasDemo.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import SectionPortals from '../components/SectionPortals.astro';
 import { getCollection } from 'astro:content';
 import { CATEGORY_META, STATUS_META } from '../lib/projectMeta';
 
@@ -63,6 +64,11 @@ const featuredResearch = (await getCollection('research'))
       </a>
     </div>
   </section>
+
+  <!-- ===================== SECTION PORTALS ===================== -->
+  <!-- Three cards that preview each section's background motif on hover and
+       link to it. See src/components/SectionPortals.astro. -->
+  <SectionPortals />
 
   <!-- ===================== CANVAS DEMO ===================== -->
   <section class="py-8">
