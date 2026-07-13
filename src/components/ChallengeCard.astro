@@ -3,9 +3,13 @@
 //  ChallengeCard.astro  —  one clickable card for a solved coding problem
 // ============================================================================
 //
-//  PURPOSE: shows a single challenge's source (Codeforces / freeCodeCamp / …),
-//  optional difficulty, title, description and tags, linking to its full page
-//  where the problem and the solutions live. Used on the /problems page.
+//  PURPOSE: shows a single challenge's problem number, source (Codeforces /
+//  freeCodeCamp / …), date, optional difficulty, title, description and tags,
+//  linking to its full page where the problem and the solutions live. Used on
+//  the /problems page.
+//
+//  The `data-search` attribute carries a lowercased blob of the card's text so
+//  the search box on /problems can filter cards without any per-card wiring.
 // ============================================================================
 
 interface Props {
@@ -14,18 +18,40 @@ interface Props {
   title: string;
   description: string;
   source: string;
+  /** A sequence label within its source, e.g. "Problem 1". */
+  label: string;
+  /** The date the problem was solved. */
+  date: Date;
   /** Optional difficulty/rating label, e.g. a Codeforces "800". */
   difficulty?: string;
   tags: string[];
 }
 
-const { id, title, description, source, difficulty, tags } = Astro.props;
+const { id, title, description, source, label, date, difficulty, tags } = Astro.props;
+
+// Friendly date ("6 Jul 2026") plus a machine-readable one for <time>.
+// Both are computed in UTC so the visible label always agrees with the
+// datetime attribute, regardless of the timezone the site is built in.
+// (Frontmatter dates like `2026-01-20` are stored as UTC midnight.)
+const dateLabel = date.toLocaleDateString('en-GB', {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+const isoDate = date.toISOString().slice(0, 10);
+
+// Everything the search box should match against, lowercased once here.
+const search = [label, source, title, description, ...tags]
+  .join(' ')
+  .toLowerCase();
 ---
 
 <article
+  data-search={search}
   class="group relative flex h-full flex-col rounded-xl border border-slate-200 bg-white p-5 transition hover:border-accent-400 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900 dark:hover:border-accent-500"
 >
-  <div class="mb-3 flex flex-wrap items-center gap-2">
+  <div class="mb-2 flex flex-wrap items-center gap-2">
     <span class="rounded-full bg-accent-100 px-2.5 py-0.5 text-xs font-medium text-accent-700 dark:bg-accent-900/50 dark:text-accent-300">
       {source}
     </span>
@@ -36,6 +62,12 @@ const { id, title, description, source, difficulty, tags } = Astro.props;
         </span>
       )
     }
+  </div>
+
+  <div class="mb-2 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+    <span class="font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-300">{label}</span>
+    <span aria-hidden="true">&middot;</span>
+    <time datetime={isoDate}>{dateLabel}</time>
   </div>
 
   <h3 class="font-serif text-lg font-semibold text-slate-900 dark:text-white">
